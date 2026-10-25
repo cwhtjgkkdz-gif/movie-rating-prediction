@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>评分预测 — 回归任务</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei","SimHei",sans-serif;background:#0f1923;color:#e0e0e0;min-height:100vh}
+  .nav{background:#1a2735;padding:14px 30px;display:flex;align-items:center;gap:20px;border-bottom:1px solid #2a3a50}
+  .nav a{color:#5b9bd5;text-decoration:none;font-size:.95em}
+  .container{max-width:1000px;margin:0 auto;padding:30px 20px}
+  h1{color:#5b9bd5;margin-bottom:6px}
+  .sub{opacity:.6;margin-bottom:30px;font-size:.9em}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;margin-bottom:30px}
+  .section{background:#1a2735;border-radius:12px;padding:25px}
+  .section h3{color:#5b9bd5;margin-bottom:18px;font-size:1.05em;border-bottom:1px solid #2a3a50;padding-bottom:10px}
+  .field{margin-bottom:14px}
+  .field label{display:block;margin-bottom:5px;font-size:.85em;opacity:.7}
+  .field input,.field select{width:100%;padding:9px 12px;background:#0f1923;border:1px solid #2a3a50;border-radius:6px;color:#e0e0e0;font-size:.9em}
+  .field input:focus,.field select:focus{outline:none;border-color:#5b9bd5}
+  .field input[type=range]{padding:0;height:6px;-webkit-appearance:none;background:#2a3a50;border:none;border-radius:3px;cursor:pointer}
+  .field input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#5b9bd5;border-radius:50%;cursor:pointer}
+  .range-val{text-align:center;color:#5b9bd5;font-weight:bold;font-size:.9em}
+  .genres{display:flex;flex-wrap:wrap;gap:6px}
+  .genres label{padding:5px 12px;background:#0f1923;border:1px solid #2a3a50;border-radius:20px;font-size:.8em;cursor:pointer;transition:all .2s;user-select:none}
+  .genres input{display:none}
+  .genres input:checked+span{color:#5b9bd5;font-weight:bold}
+  .genres label:has(input:checked){border-color:#5b9bd5;background:#5b9bd515}
+  .btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#5b9bd5,#4472c4);color:white;border:none;border-radius:10px;font-size:1.1em;cursor:pointer;font-weight:bold;transition:all .3s;margin-top:10px}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(91,155,213,.3)}
+  .preset{padding:8px 16px;background:#1a2735;border:1px solid #2a3a50;border-radius:8px;color:#bbb;cursor:pointer;font-size:.85em;transition:all .2s}
+  .preset:hover{border-color:#5b9bd5;color:#5b9bd5;background:#5b9bd510}
+  .result{display:none;margin-top:30px}
+  .result.show{display:block}
+  .result-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px}
+  .r-card{background:#1a2735;border-radius:12px;padding:25px;text-align:center;border:2px solid #2a3a50}
+  .r-card.best{border-color:#5b9bd5;box-shadow:0 0 20px rgba(91,155,213,.15)}
+  .r-card .model{font-size:.8em;opacity:.5;margin-bottom:6px}
+  .r-card .score{font-size:2.5em;font-weight:bold;color:#5b9bd5}
+  .r-card .stars{font-size:1.2em;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="nav">
+  <a href="/">🏠 首页</a><span style="color:#3a4a60">›</span>
+  <span>📊 评分预测（回归）</span>
+  <span style="margin-left:auto;opacity:.5;font-size:.85em">Ridge + MLP</span>
+</div>
+<div class="container">
+  <h1>📊 评分预测</h1>
+  <p class="sub">输入用户信息与电影特征，Ridge 岭回归 + MLP 神经网络双模型预测评分（1-5分）</p>
+
+  <div class="form-grid">
+    <div class="section">
+      <h3>👤 用户信息</h3>
+      <div class="field">
+        <label>年龄: <span id="age-val" class="range-val">__AGE__</span> 岁</label>
+        <input type="range" id="age" min="__AGE_MIN__" max="__AGE_MAX__" value="__AGE__" oninput="document.getElementById('age-val').textContent=this.value">
+      </div>
+      <div class="field"><label>性别</label><select id="gender"><option value="M">男</option><option value="F">女</option></select></div>
+      <div class="field"><label>职业</label><select id="occupation">__OCCUPATIONS__</select></div>
+      <div class="field">
+        <label>历史评分均值 <span style="opacity:.5">(宽容度)</span></label>
+        <input type="range" id="user_avg_rating" min="1" max="5" step="0.1" value="3.5" oninput="document.getElementById('uar-val').textContent=this.value">
+        <span id="uar-val" class="range-val">3.5</span>
+      </div>
+      <div class="field"><label>评分次数 <span style="opacity:.5">(活跃度)</span></label><input type="number" id="user_rating_count" value="100" min="1" max="1000"></div>
+      <div class="field">
+        <label>评分标准差 <span style="opacity:.5">(口味稳定性)</span></label>
+        <input type="range" id="user_rating_std" min="0" max="2" step="0.1" value="1.0" oninput="document.getElementById('urs-val').textContent=this.value">
+        <span id="urs-val" class="range-val">1.0</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>🎥 电影信息</h3>
+      <div class="field">
+        <label>上映年份: <span id="year-val" class="range-val">__MOVIE_YEAR__</span></label>
+        <input type="range" id="movie_year" min="__YEAR_MIN__" max="__YEAR_MAX__" value="__MOVIE_YEAR__" oninput="document.getElementById('year-val').textContent=this.value">
+      </div>
+      <div class="field">
+        <label>上映季节</label>
+        <select id="season"><option value="1">春</option><option value="2" selected>夏</option><option value="3">秋</option><option value="4">冬</option></select>
+      </div>
+      <div class="field">
+        <label>电影平均评分 <span style="opacity:.5">(质量)</span></label>
+        <input type="range" id="movie_avg_rating" min="1" max="5" step="0.1" value="3.5" oninput="document.getElementById('mar-val').textContent=this.value">
+        <span id="mar-val" class="range-val">3.5</span>
+      </div>
+      <div class="field"><label>评分人数 <span style="opacity:.5">(热度)</span></label><input type="number" id="movie_rating_count" value="100" min="1" max="600"></div>
+      <div class="field">
+        <label>电影年龄（上映后多少年）</label>
+        <input type="range" id="movie_age" min="0" max="80" value="5" oninput="document.getElementById('ma-val').textContent=this.value">
+        <span id="ma-val" class="range-val">5</span> 年
+      </div>
+      <div class="field">
+        <label>评分标准差 <span style="opacity:.5">(争议度)</span></label>
+        <input type="range" id="movie_rating_std" min="0" max="2" step="0.1" value="1.0" oninput="document.getElementById('mrs-val').textContent=this.value">
+        <span id="mrs-val" class="range-val">1.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-bottom:15px">
+    <h3>📅 评分时间 & 电影类型</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:15px">
+      <div class="field">
+        <label>星期几</label>
+        <select id="dayofweek"><option value="0">周一</option><option value="1">周二</option><option value="2">周三</option><option value="3" selected>周四</option><option value="4">周五</option><option value="5">周六</option><option value="6">周日</option></select>
+      </div>
+      <div class="field"><label>是否周末</label><select id="weekend"><option value="0">工作日</option><option value="1" selected>周末</option></select></div>
+      <div class="field">
+        <label>月份: <span id="month-val" class="range-val">6</span> 月</label>
+        <input type="range" id="month" min="1" max="12" value="6" oninput="document.getElementById('month-val').textContent=this.value">
+      </div>
+    </div>
+    <label style="display:block;margin-bottom:8px;font-size:.85em;opacity:.7">电影类型（可多选）</label>
+    <div class="genres" id="genre-group">__GENRES__</div>
+  </div>
+
+  <div class="section" style="margin-bottom:15px">
+    <h3>⚡ 快捷预设案例</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <button class="preset" onclick="preset('tolerant')">😊 宽容用户 × 高分电影</button>
+      <button class="preset" onclick="preset('picky')">😐 挑剔用户 × 低分电影</button>
+      <button class="preset" onclick="preset('young_action')">🎬 年轻男性 × 动作片</button>
+      <button class="preset" onclick="preset('senior_drama')">🎭 年长用户 × 剧情片</button>
+      <button class="preset" onclick="preset('weekend_comedy')">😂 周末 × 喜剧片</button>
+    </div>
+  </div>
+
+  <button class="btn" onclick="predict()">🔮 预测评分</button>
+
+  <div class="result" id="result">
+    <h3 style="margin-bottom:15px;color:#5b9bd5">预测结果</h3>
+    <div class="result-cards">
+      <div class="r-card"><div class="model">Ridge 岭回归</div><div class="score" id="ridge-score">-</div><div class="stars" id="ridge-stars"></div></div>
+      <div class="r-card"><div class="model">MLP 神经网络</div><div class="score" id="mlp-score">-</div><div class="stars" id="mlp-stars"></div></div>
+      <div class="r-card"><div class="model">综合预测（均值）</div><div class="score" id="ens-score">-</div><div class="stars" id="ens-stars"></div></div>
+    </div>
+    <p style="opacity:.4;text-align:center;margin-top:12px;font-size:.85em">MLP 为最优模型（R²=0.3414），均值仅供参考</p>
+  </div>
+</div>
+
+<script>
+function setVal(id,val){document.getElementById(id).value=val;if(document.getElementById(id+'-val'))document.getElementById(id+'-val').textContent=val;}
+function preset(type){
+  // 重置所有类型
+  document.querySelectorAll('.genre').forEach(cb=>cb.checked=false);
+  const cases={
+    tolerant:{age:40,gender:'F',occupation:'educator',user_avg_rating:'4.5',user_rating_count:'200',user_rating_std:'0.5',movie_year:'1998',season:'2',movie_avg_rating:'4.5',movie_rating_count:'400',movie_rating_std:'0.6',movie_age:'2',dayofweek:'5',weekend:'1',month:'7',genres:['Drama','Romance']},
+    picky:{age:25,gender:'M',occupation:'programmer',user_avg_rating:'2.0',user_rating_count:'50',user_rating_std:'1.5',movie_year:'1975',season:'1',movie_avg_rating:'2.0',movie_rating_count:'20',movie_rating_std:'1.8',movie_age:'25',dayofweek:'2',weekend:'0',month:'3',genres:['Horror']},
+    young_action:{age:20,gender:'M',occupation:'student',user_avg_rating:'3.5',user_rating_count:'80',user_rating_std:'1.0',movie_year:'1995',season:'3',movie_avg_rating:'3.5',movie_rating_count:'300',movie_rating_std:'1.0',movie_age:'5',dayofweek:'5',weekend:'1',month:'7',genres:['Action','Adventure','Sci-Fi']},
+    senior_drama:{age:60,gender:'M',occupation:'writer',user_avg_rating:'4.0',user_rating_count:'150',user_rating_std:'0.7',movie_year:'1985',season:'4',movie_avg_rating:'4.2',movie_rating_count:'100',movie_rating_std:'0.5',movie_age:'15',dayofweek:'3',weekend:'0',month:'11',genres:['Drama']},
+    weekend_comedy:{age:28,gender:'F',occupation:'entertainment',user_avg_rating:'3.8',user_rating_count:'120',user_rating_std:'0.9',movie_year:'2000',season:'2',movie_avg_rating:'3.6',movie_rating_count:'250',movie_rating_std:'0.8',movie_age:'0',dayofweek:'6',weekend:'1',month:'6',genres:['Comedy']},
+  };
+  let c=cases[type];
+  Object.keys(c).forEach(k=>{
+    if(k==='genres') c[k].forEach(g=>{let cb=document.querySelector(`.genre[data-genre="${g}"]`);if(cb)cb.checked=true;});
+    else setVal(k,c[k]);
+  });
+}
+function getFeatures(){
+  let data={};
+  ['age','movie_year','dayofweek','month','gender','occupation','season',
+   'user_avg_rating','movie_avg_rating','user_rating_count','movie_rating_count',
+   'user_rating_std','movie_rating_std','movie_age'].forEach(id=>{
+    data[id]=document.getElementById(id).value;
+  });
+  data.weekend=document.getElementById('weekend').value;
+  document.querySelectorAll('.genre:checked').forEach(cb=>{data['genre_'+cb.dataset.genre]='1';});
+  return data;
+}
+function stars(r){let s='';for(let i=1;i<=5;i++)s+=i<=Math.round(r)?'★':'☆';return s;}
+async function predict(){
+  let data=getFeatures();
+  let resp=await fetch('/api/predict/regression',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  let r=await resp.json();
+  ['ridge','mlp','ens'].forEach(k=>{
+    document.getElementById(k+'-score').textContent=r[k==='ens'?'ensemble':k];
+    document.getElementById(k+'-stars').textContent=stars(r[k==='ens'?'ensemble':k]);
+  });
+  document.getElementById('result').classList.add('show');
+  document.getElementById('result').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

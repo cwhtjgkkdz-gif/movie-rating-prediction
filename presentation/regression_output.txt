@@ -1,0 +1,123 @@
+
+============================================================
+  模块二：评分预测 — Ridge vs MLP 回归对比
+============================================================
+  训练集: 69,999  验证集: 15,000  测试集: 15,001
+
+  --- 模型一：Ridge 岭回归 ---
+  原理: 线性回归 + L2 正则化 λ·||w||²，惩罚大权重防止过拟合
+  最优 α = 100.0
+    α=  0.01  →  MSE=0.8646
+    α=  0.10  →  MSE=0.8646
+    α=  1.00  →  MSE=0.8646
+    α= 10.00  →  MSE=0.8646
+    α=100.00  →  MSE=0.8646  ★ 最优
+
+  --- 模型二：MLP 神经网络 ---
+  结构: 输入(35) → 隐藏层[64, 32, 16] → 输出(1)
+  激活: ReLU  |  优化器: Adam  |  早停: EarlyStopping(耐心=10)
+  正则: L2(α=0.0001)  |  学习率: adaptive 自适应衰减
+Iteration 1, loss = 0.59782776
+Validation score: 0.285538
+Iteration 2, loss = 0.43533282
+Validation score: 0.296960
+Iteration 3, loss = 0.43047462
+Validation score: 0.302827
+Iteration 4, loss = 0.42708177
+Validation score: 0.285098
+Iteration 5, loss = 0.42565303
+Validation score: 0.300748
+Iteration 6, loss = 0.42418616
+Validation score: 0.309501
+Iteration 7, loss = 0.42295999
+Validation score: 0.308201
+Iteration 8, loss = 0.42157879
+Validation score: 0.312231
+Iteration 9, loss = 0.42001705
+Validation score: 0.305686
+Iteration 10, loss = 0.41873086
+Validation score: 0.309961
+Iteration 11, loss = 0.41722236
+Validation score: 0.312834
+Iteration 12, loss = 0.41573404
+Validation score: 0.312625
+Iteration 13, loss = 0.41487515
+Validation score: 0.310599
+Iteration 14, loss = 0.41405615
+Validation score: 0.299889
+Iteration 15, loss = 0.41342087
+Validation score: 0.310917
+Iteration 16, loss = 0.41193632
+Validation score: 0.312603
+Iteration 17, loss = 0.41117881
+Validation score: 0.311636
+Iteration 18, loss = 0.40931159
+Validation score: 0.310469
+Iteration 19, loss = 0.40857908
+Validation score: 0.312799
+Iteration 20, loss = 0.40689061
+Validation score: 0.313164
+Iteration 21, loss = 0.40695372
+Validation score: 0.313790
+Iteration 22, loss = 0.40545478
+Validation score: 0.305910
+Iteration 23, loss = 0.40446330
+Validation score: 0.307717
+Iteration 24, loss = 0.40351644
+Validation score: 0.303412
+Iteration 25, loss = 0.40277171
+Validation score: 0.311569
+Iteration 26, loss = 0.40240351
+Validation score: 0.308281
+Iteration 27, loss = 0.40074804
+Validation score: 0.303678
+Iteration 28, loss = 0.40011450
+Validation score: 0.301044
+Iteration 29, loss = 0.39885092
+Validation score: 0.307007
+Iteration 30, loss = 0.39909875
+Validation score: 0.300024
+Iteration 31, loss = 0.39765842
+Validation score: 0.303983
+Iteration 32, loss = 0.39720605
+Validation score: 0.302273
+Validation score did not improve more than tol=0.000100 for 10 consecutive epochs. Stopping.
+  实际迭代: 32 轮  |  最终 Loss: 0.3972
+
+  ╔══════════════════════════════════════════════════════════╗
+  ║              回归模型对比 (测试集)                         ║
+  ╠══════════════╦══════════╦═══════════╦════════════════════╣
+  ║ 模型          ║   MAE ↓  ║  RMSE ↓   ║   R² ↑             ║
+  ╠══════════════╬══════════╬═══════════╬════════════════════╣
+  ║ Ridge (岭回归) ║ 0.7333   ║ 0.9257    ║ 0.3268            ║
+  ║ MLP (神经网络) ║ 0.7181   ║ 0.9156    ║ 0.3414            ║
+  ╚══════════════╩══════════╩═══════════╩════════════════════╝
+
+  ★ 最优模型: MLP 神经网络 (R²=0.3414, MAE=0.7181)
+
+  【MLP 最优参数】
+  ├─ hidden_layer_sizes : [64, 32, 16]
+  ├─ activation         : ReLU
+  ├─ solver             : Adam
+  ├─ alpha (L2正则)     : 0.0001
+  ├─ batch_size         : 64
+  ├─ learning_rate      : adaptive (自适应衰减)
+  ├─ early_stopping     : True (耐心=10)
+  ├─ 实际迭代次数        : 32
+  └─ 最终 Loss          : 0.3972
+  
+  [图] 已保存: p_regression_comparison.png
+  [图] 已保存: p_mlp_loss.png
+  [图] 已保存: p_prediction_scatter.png
+
+============================================================
+  模块二完成！
+============================================================
+E:\Deep_Learning\douban_deeplearning\src\module2_regression.py:129: UserWarning: Glyph 178 (\N{SUPERSCRIPT TWO}) missing from font(s) SimHei.
+  plt.tight_layout()
+E:\Deep_Learning\douban_deeplearning\src\module2_regression.py:130: UserWarning: Glyph 178 (\N{SUPERSCRIPT TWO}) missing from font(s) SimHei.
+  plt.savefig('presentation/figures/p_regression_comparison.png', dpi=150, bbox_inches='tight')
+E:\Deep_Learning\douban_deeplearning\src\utils.py:47: UserWarning: Glyph 178 (\N{SUPERSCRIPT TWO}) missing from font(s) SimHei.
+  plt.tight_layout()
+D:\Python 3.9.1(64-bit) Setup\lib\tkinter\__init__.py:805: UserWarning: Glyph 178 (\N{SUPERSCRIPT TWO}) missing from font(s) SimHei.
+  func(*args)

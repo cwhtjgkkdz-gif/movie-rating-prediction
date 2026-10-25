@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>豆瓣电影评分预测系统 — 期末答辩</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "SimHei", sans-serif; background: #f0f2f5; color: #333; line-height: 1.8; }
+  .hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; text-align: center; padding: 50px 20px 35px; }
+  .hero h1 { font-size: 2em; margin-bottom: 8px; }
+  .hero p { opacity: 0.8; font-size: 0.95em; }
+  .nav { position: sticky; top: 0; z-index: 100; background: white; display: flex; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .nav a { text-decoration: none; color: #666; padding: 14px 32px; font-size: 1em; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; }
+  .nav a:hover, .nav a.active { color: #4472C4; border-bottom-color: #4472C4; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+  .section-title { text-align: center; margin: 40px 0 25px; padding: 18px; background: linear-gradient(135deg, #4472C4, #5B9BD5); color: white; border-radius: 10px; }
+  .section-title h2 { font-size: 1.5em; }
+  .card { background: white; border-radius: 10px; padding: 25px 30px; margin-bottom: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .card h3 { font-size: 1.15em; color: #4472C4; border-left: 4px solid #4472C4; padding-left: 12px; margin-bottom: 15px; }
+  .card img { width: 100%; border-radius: 6px; margin: 12px 0; }
+  .console { background: #1e1e1e; color: #d4d4d4; padding: 18px 22px; border-radius: 8px; font-family: "Consolas", "Courier New", monospace; font-size: 0.82em; line-height: 1.6; white-space: pre-wrap; overflow-x: auto; max-height: 500px; overflow-y: auto; margin: 12px 0; }
+  .conclusion { background: #f0fdf4; border: 1px solid #86efac; padding: 14px 18px; margin: 12px 0; border-radius: 8px; font-size: 0.93em; }
+  .conclusion::before { content: "✅ 结论: "; font-weight: bold; color: #16a34a; }
+  .footer { text-align: center; padding: 30px; color: #999; font-size: 0.9em; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>豆瓣电影评分预测系统</h1>
+  <p>基于传统机器学习与神经网络的电影数据分析 ｜ MovieLens 100K ｜ Python + Scikit-learn</p>
+</div>
+
+<nav class="nav">
+  <a href="#regression">回归任务：评分预测</a>
+  <a href="#classification">分类任务：电影类型分类</a>
+</nav>
+
+<div class="container">
+
+<!-- ================================================================ -->
+<!-- 回归任务 -->
+<!-- ================================================================ -->
+<div id="regression" class="section-title">
+  <h2>回归任务：评分预测 — Ridge vs MLP</h2>
+</div>
+
+<div class="card">
+  <h3>控制台运行结果</h3>
+  <div class="console" id="reg-output">加载中...</div>
+</div>
+
+<div class="card">
+  <h3>图1：回归模型性能对比</h3>
+  <img src="figures/p_regression_comparison.png" alt="回归对比">
+  <div class="conclusion">MLP 在三项指标上均优于 Ridge。最优模型 MLP（R²=0.3414, MAE=0.7181），平均预测误差不到 1 分。</div>
+</div>
+
+<div class="card">
+  <h3>图2：MLP 训练 Loss 曲线</h3>
+  <img src="figures/p_mlp_loss.png" alt="MLP Loss">
+  <div class="conclusion">Loss 从 0.6 降至 0.4，第 32 轮 EarlyStopping 触发停止。早停策略有效防止了过拟合。</div>
+</div>
+
+<div class="card">
+  <h3>图3：预测评分 vs 真实评分</h3>
+  <img src="figures/p_prediction_scatter.png" alt="预测vs真实">
+  <div class="conclusion">大部分样本沿完美预测线分布，模型整体预测准确。两端极端评分偏差稍大，属评分预测任务的普遍现象。</div>
+</div>
+
+<div class="conclusion" style="border: 2px solid #16a34a; font-size: 1em;">
+  最优回归模型: MLP 神经网络 ｜ 参数: hidden_layers=[64,32,16], activation=ReLU, solver=Adam, early_stopping=True
+</div>
+
+<!-- ================================================================ -->
+<!-- 分类任务 -->
+<!-- ================================================================ -->
+<div id="classification" class="section-title">
+  <h2>分类任务：电影类型分类 — 决策树 vs 随机森林</h2>
+</div>
+
+<div class="card">
+  <h3>控制台运行结果</h3>
+  <div class="console" id="cls-output">加载中...</div>
+</div>
+
+<div class="card">
+  <h3>图1：决策树数量对分类精度的影响</h3>
+  <img src="figures/p_n_estimators.png" alt="n_estimators">
+  <div class="conclusion">5 棵树准确率仅 97.2%，增加到 10 棵跃升至 99.2%，之后小幅波动并收敛。200 棵时达到最优（99.0%），边际收益递减。</div>
+</div>
+
+<div class="card">
+  <h3>图2：特征重要性</h3>
+  <img src="figures/p_feature_importance.png" alt="特征重要性">
+  <div class="conclusion">电影平均评分（avg_rating）是最重要的分类特征，其次是评分人数（num_ratings）和上映年份。不同类型电影的评分水平和热度差异明显。</div>
+</div>
+
+<div class="card">
+  <h3>图3：随机森林混淆矩阵</h3>
+  <img src="figures/p_confusion_matrix.png" alt="混淆矩阵">
+  <div class="conclusion">对角线深蓝、非对角线接近零——绝大多数样本被正确分类。测试集 504 个样本中仅约 5 个误分类，准确率 99.0%。</div>
+</div>
+
+<div class="conclusion" style="border: 2px solid #16a34a; font-size: 1em;">
+  最优分类模型: 随机森林 (n_estimators=200) ｜ Bagging 集成有效降低方差，泛化优于单棵决策树
+</div>
+
+</div>
+
+<div class="footer"><p>期末课程设计 · 神经网络与机器学习</p></div>
+
+<script>
+fetch('regression_output.txt')
+  .then(r => r.text())
+  .then(t => { document.getElementById('reg-output').textContent = t; })
+  .catch(() => { document.getElementById('reg-output').textContent = '请先运行 build_presentation.py'; });
+fetch('classification_output.txt')
+  .then(r => r.text())
+  .then(t => { document.getElementById('cls-output').textContent = t; })
+  .catch(() => { document.getElementById('cls-output').textContent = '请先运行 build_presentation.py'; });
+</script>
+
+</body>
+</html>

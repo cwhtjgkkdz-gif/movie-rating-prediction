@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 数据处理产物（可重新生成：data_download.py / module1_preprocessing.py）
+data/
+
+# 训练好的模型（可重新生成：train_models.py）
+models/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log

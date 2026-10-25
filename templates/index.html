@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电影评分预测系统</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei","SimHei",sans-serif;background:#0f1923;color:#e0e0e0;min-height:100vh}
+  .hero{text-align:center;padding:80px 20px 50px;background:linear-gradient(135deg,#0a1628,#1a2a40)}
+  .hero h1{font-size:2.6em;color:#5b9bd5;margin-bottom:12px}
+  .hero p{font-size:1.1em;opacity:.7;margin-bottom:6px}
+  .cards{max-width:1000px;margin:50px auto;padding:0 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:25px}
+  .card{background:#1a2735;border-radius:14px;padding:35px 25px;text-align:center;text-decoration:none;color:#e0e0e0;transition:all .3s;border:2px solid transparent}
+  .card:hover{transform:translateY(-4px);border-color:#5b9bd5;box-shadow:0 8px 30px rgba(91,155,213,.2)}
+  .card .icon{font-size:2.8em;margin-bottom:15px}
+  .card h2{font-size:1.3em;margin-bottom:8px;color:#5b9bd5}
+  .card p{opacity:.7;font-size:.9em;line-height:1.6}
+  .card .tag{display:inline-block;background:#5b9bd520;color:#5b9bd5;padding:4px 14px;border-radius:20px;font-size:.8em;margin-top:12px}
+  .footer{text-align:center;padding:40px;opacity:.4;font-size:.85em}
+  @media(max-width:768px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>🎬 电影评分预测系统</h1>
+  <p>基于 Ridge 岭回归 + MLP 神经网络 + 随机森林</p>
+  <p>MovieLens 100K ｜ Python + Scikit-learn</p>
+</div>
+<div class="stats">
+  <div class="stat"><div class="num">100,000</div><div class="txt">条评分记录</div></div>
+  <div class="stat"><div class="num">943</div><div class="txt">位用户</div></div>
+  <div class="stat"><div class="num">1,682</div><div class="txt">部电影</div></div>
+  <div class="stat"><div class="num">35</div><div class="txt">维特征</div></div>
+  <div class="stat"><div class="num">4</div><div class="txt">个模型</div></div>
+</div>
+<style>
+  .stats{max-width:1000px;margin:0 auto 30px;padding:0 20px;display:flex;gap:15px;justify-content:center}
+  .stat{background:#1a2735;border-radius:10px;padding:20px 28px;text-align:center;border:1px solid #2a3a50;flex:1}
+  .stat .num{font-size:2em;font-weight:bold;color:#5b9bd5}
+  .stat .txt{font-size:.8em;opacity:.5;margin-top:4px}
+  @media(max-width:768px){.stats{flex-wrap:wrap}.stat{flex:1 1 40%}}
+</style>
+
+<div class="cards">
+  <a href="/results" class="card">
+    <div class="icon">📊</div>
+    <h2>训练结果展示</h2>
+    <p>6 张可视化图表：模型对比、Loss曲线、预测散点、混淆矩阵、特征重要性等</p>
+    <span class="tag">实验图表</span>
+  </a>
+  <a href="/regression" class="card">
+    <div class="icon">🔮</div>
+    <h2>评分预测</h2>
+    <p>输入用户信息和电影特征，Ridge + MLP 双模型实时预测评分（1-5 分）</p>
+    <span class="tag">回归任务</span>
+  </a>
+  <a href="/classification" class="card">
+    <div class="icon">🏷️</div>
+    <h2>类型分类</h2>
+    <p>输入电影属性，决策树 + 随机森林判断电影类型，展示 Top 3 候选及置信度</p>
+    <span class="tag">分类任务</span>
+  </a>
+</div>
+<div class="footer">神经网络与机器学习 · 课程设计</div>
+</body>
+</html>
